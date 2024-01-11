@@ -1,6 +1,6 @@
 
 export const getCountryDisplayName = (value) => {
-  if (!value) return "";
+  if (!value || !Number(value)) return "";
   return COUNTRIES.filter((c) => c.value === value)[0].label || "";
 }
 
