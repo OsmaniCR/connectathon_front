@@ -27,7 +27,7 @@ const AntTable = (
         expandedRowRender=()=>{return <></>}, 
         loading=false,
         pagination=true,
-        scroll=false,
+        scroll={x: true, y: true},
     }) => {
 
     const {tableFilters, setTableFilters, nexPageUrl, previousPageUrl, setPreviousPage, setNextPage} = useTableFilters();
@@ -46,35 +46,38 @@ const AntTable = (
       
 
     return (
-        <> 
-            <Table
-                className='flex w-full h-full'
-                columns={makeColumns(columns)}
-                rowKey={(record) => record.id}
-                rowSelection={
-                    setRowSelection &&
-                    {
-                    onChange: (_, selectedRows) => {
-                        setRowSelection(selectedRows);
-                    },
-                }}
-                rowClassName="text-xs"
-                expandable={ expandable ? {
-                    expandedRowRender,
-                    defaultExpandedRowKeys: ['0']
-                    }: false
-                }
-                dataSource={data}
-                pagination={pagination && {
-                    ...tableFilters.pagination,
-                }}
-                size="small"
-                loading={loading}
-                bordered
-                onChange={handleTableChange}
-                scroll={scroll}
-            />
-        </>
+        <Table
+            style={{
+                tableLayout: 'auto',
+                width: '100%',
+                height: '100%',
+                overflowY: 'auto'
+            }}
+            columns={makeColumns(columns)}
+            rowKey={(record) => record.id}
+            rowSelection={
+                setRowSelection &&
+                {
+                onChange: (_, selectedRows) => {
+                    setRowSelection(selectedRows);
+                },
+            }}
+            rowClassName="text-xs"
+            expandable={ expandable ? {
+                expandedRowRender,
+                defaultExpandedRowKeys: ['0']
+                }: false
+            }
+            dataSource={data}
+            pagination={pagination && {
+                ...tableFilters.pagination,
+            }}
+            size="small"
+            loading={loading}
+            bordered
+            onChange={handleTableChange}
+            scroll={scroll}
+        />
     )
 }
 

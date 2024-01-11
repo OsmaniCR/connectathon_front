@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { toast } from "react-hot-toast";
 import useTableFilters from "../common/store/tableFiltersStore";
-import { axiosDelete, axiosGet, axiosPaginateGet, axiosPost, axiosPut } from "../apis/calls";
+import { axiosDelete, axiosPaginateGet, axiosPost, axiosPut } from "../apis/calls";
+import { omit } from "lodash";
 
 const resourceType = "Patient";
 
 export const useGetPatients = () => {
     const { tableFilters, setTotal, setNextPageUrl, setPreviousPageUrl } = useTableFilters();
     return useQuery({
-        queryKey: [resourceType, tableFilters],
+        queryKey: [resourceType, omit(tableFilters, ['pagination.total'])],
         queryFn: async () => {
             const data = await axiosPaginateGet(resourceType, tableFilters);
             if (data) {
@@ -16,11 +17,9 @@ export const useGetPatients = () => {
                 const { entry , link } = data ? data : [];
                 link.map(l => {
                     if (l.relation === "next"){
-                        console.log("NEXT URL");
                         setNextPageUrl(l.url);
                     }
                     if (l.relation === "previous"){
-                        console.log("PREV URL");
                         setPreviousPageUrl(l.url);
                     }
                 })
@@ -35,14 +34,34 @@ export const useGetPatients = () => {
 
 export const usePatientSave = () => {
     const queryClient = useQueryClient();
+    const { tableFilters } = useTableFilters();
     return useMutation({
       mutationFn: async (body) => !body.id ? axiosPost(`${resourceType}`, body): axiosPut(`${resourceType}/${body.id} `, body),
       onSuccess: (response) => {
         toast.success("Patient saved successfully!");
-        queryClient.invalidateQueries([key]);
+        queryClient.invalidateQueries([resourceType, omit(tableFilters, ['pagination.total'])]);
       },
-      onError: () => {
+      onError: (e) => {
+        console.log(e);
         toast.error("Error saving Patient");
+      },
+    });
+  };
+
+
+
+  export const usePatientDelete = () => {
+    const queryClient = useQueryClient();
+    const { tableFilters } = useTableFilters();
+    return useMutation({
+      mutationFn: (id) => axiosDelete(`${resourceType}/${id}`),
+      onSuccess: (response) => {
+        toast.success("Patient removed successfully!");
+        queryClient.invalidateQueries([resourceType, omit(tableFilters, ['pagination.total'])]);
+      },
+      onError: (e) => {
+        console.log(e);
+        toast.error("Error removing Patient");
       },
     });
   };

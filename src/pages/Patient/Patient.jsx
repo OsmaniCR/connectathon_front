@@ -1,4 +1,4 @@
-import { useGetPatients, usePatientSave } from "../../hooks/patient";
+import { useGetPatients, usePatientDelete, usePatientSave } from "../../hooks/patient";
 import { Form } from "antd";
 import dayjs from 'dayjs';
 import AntTable from "../../components/Tables/AntTable";
@@ -17,7 +17,9 @@ const Patient = () => {
   
     const { data, isFetching } = useGetPatients();
 
-    const { mutate: savePatient, isLoading: isSaving } = usePatientSave()
+    const { mutate: savePatient, isPending: isSaving } = usePatientSave()
+
+    const { mutate: removePatient, isPending: isRemoving } = usePatientDelete();
 
     const handleSubmit = (values) => {
       const body = patientResource({
@@ -52,7 +54,7 @@ const Patient = () => {
     
 
   return (
-        <div className="flex flex-col w-full h-full overflow-y-auto">
+        <div className="flex flex-col w-full h-full overflow-hidden">
             <div className="flex flex-row justify-start mb-2">
                 <BaseModal
                     headTitle="Patient List"
@@ -92,12 +94,17 @@ const Patient = () => {
                 />
             </div>
             <AntTable
-                loading={isFetching || isSaving}
+                scroll={{
+                    x: true,
+                    y: true,
+                  }}
+                loading={isFetching || isSaving || isRemoving}
                 data={data}
                 columns={makeColumns({
                     setEditingPatient: setEditingPatient,
                     setModalIsOpen: setModalIsOpen,
-                    form: form
+                    form: form,
+                    removePatient: removePatient
                 })}
                 
             />

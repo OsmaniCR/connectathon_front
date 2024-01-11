@@ -1,6 +1,6 @@
 
 export const getMtDisplayName = (value) => {
-  if (!value) return "";
+  if (!value || Number(value)) return "";
   return MARITALSTATUS.filter((mt) => mt.value === value)[0].label || "";
 }
 

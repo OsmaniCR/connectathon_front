@@ -1,12 +1,12 @@
 import dayjs from "dayjs";
 import { formatDate } from "../../utils/formatDates";
 import { Button, Space, Tooltip } from "antd";
-import { EditOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import COUNTRIES, { getCountryDisplayName } from "../../resources/Countries";
 import MARITALSTATUS, { getMtDisplayName } from "../../resources/MaritalStatus";
 import BIOLOGICALSEX, { getBsDisplayName } from "../../resources/BiologicalSex";
+import { RiEdit2Line, RiDeleteBin6Line } from "react-icons/ri";
 
-export const makeColumns = ({setModalIsOpen, setEditingPatient, form}) => {
+export const makeColumns = ({setModalIsOpen, setEditingPatient, form, removePatient}) => {
   const cols = [
     /* {
         dataIndex: "id",
@@ -68,7 +68,8 @@ export const makeColumns = ({setModalIsOpen, setEditingPatient, form}) => {
         render: (extension) => (
             <>
                 {
-                    extension && extension[0] && extension[0].valueCodeableConcept.coding[0] 
+                    extension && extension[0] && extension[0].valueCodeableConcept 
+                    && extension[0].valueCodeableConcept.coding[0]
                     && getCountryDisplayName(extension[0].valueCodeableConcept.coding[0].code)
                 }
             </>
@@ -79,7 +80,7 @@ export const makeColumns = ({setModalIsOpen, setEditingPatient, form}) => {
         title: "Address",
         align: "center",
         render: (address) => (
-            <>{address && address[0] && address[0].line[0]}</>
+            <>{address && address[0] && address[0].line && address[0].line[0]}</>
         )
     },
     {
@@ -101,6 +102,8 @@ export const makeColumns = ({setModalIsOpen, setEditingPatient, form}) => {
     {
         key: "actions",
         title: "Actions",
+        fixed: 'right',
+        width: 100,
         render: record => (
             <Space>
                 <Tooltip title="Edit Patient">
@@ -116,14 +119,20 @@ export const makeColumns = ({setModalIsOpen, setEditingPatient, form}) => {
                                 {lastFamilyName : record.name[0]._family.extension[0].valueString} : {}),
                             ...(record.telecom && record.telecom[0] ? { phoneNumber: record.telecom[0].value}: {}),
                             ...(record.extension && record.extension[0] ? { countryId: record.extension[0].valueCodeableConcept.coding[0].code}: {}),
-                            ...(record.address && record.address[0] ? { address: record.address[0].line[0]}: {}),
+                            ...(record.address && record.address[0] && record.address[0].line ? { address: record.address[0].line[0]}: {}),
                             ...(record.maritalStatus ? { maritalStatus: record.maritalStatus.coding[0].code}: {}),
                             ...(record.gender ? {gender: record.gender}: {}),
                             ...(record.birthDate ? {birthDate: dayjs(record.birthDate, 'YYYY-MM-DD')}: {}),
                             });
-                    }} icon={<EditOutlined />}/>
+                    }} icon={<RiEdit2Line size="1.2em" color="#1ba1e2"/>}/>
                 </Tooltip>
-                    
+                <Tooltip title="Remove Patient">
+                    <Button 
+                        type="link" 
+                        onClick={() => removePatient(record.id)}
+                        icon={<RiDeleteBin6Line size="1.1em" color="#1ba1e2"/>}
+                    />
+                </Tooltip>
             </Space>
         )
     }
